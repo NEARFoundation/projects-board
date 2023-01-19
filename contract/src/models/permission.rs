@@ -74,19 +74,6 @@ impl Contract {
         })
     }
 
-    pub fn remove_permission(&mut self, permission_id: String) -> Option<PermissionView> {
-        let permission = self.permissions.remove(&permission_id)?;
-        let permission_type = self.permission_types.get(&permission.type_id)?.clone();
-
-        Some(PermissionView {
-            id: permission.id,
-            description: permission.description,
-            project_id: permission.project_id,
-            contributor_id: permission.contributor_id,
-            permission_type,
-        })
-    }
-
     pub fn update_permission(
         &mut self,
         permission_id: String,
@@ -107,5 +94,58 @@ impl Contract {
             contributor_id: permission.contributor_id,
             permission_type,
         })
+    }
+
+    pub fn remove_permission(&mut self, permission_id: String) -> Option<PermissionView> {
+        let permission = self.permissions.remove(&permission_id)?;
+        let permission_type = self.permission_types.get(&permission.type_id)?.clone();
+
+        Some(PermissionView {
+            id: permission.id,
+            description: permission.description,
+            project_id: permission.project_id,
+            contributor_id: permission.contributor_id,
+            permission_type,
+        })
+    }
+
+    pub fn get_permission_type(&self, permission_type: String) -> Option<PermissionType> {
+        self.permission_types.get(&permission_type).cloned()
+    }
+
+    pub fn get_permission_types(&self) -> Vec<PermissionType> {
+        self.permission_types
+            .into_iter()
+            .map(|(_, permission_type)| permission_type)
+            .cloned()
+            .collect()
+    }
+
+    pub fn create_permission_type(
+        &mut self,
+        permission_type: PermissionType,
+    ) -> Option<PermissionType> {
+        if !self.permission_types.contains_key(&permission_type.name) {
+            self.permission_types
+                .insert(permission_type.name.clone(), permission_type)
+        } else {
+            None
+        }
+    }
+
+    pub fn update_permission_type(
+        &mut self,
+        permission_type: PermissionType,
+    ) -> Option<PermissionType> {
+        if self.permission_types.contains_key(&permission_type.name) {
+            self.permission_types
+                .insert(permission_type.name.clone(), permission_type)
+        } else {
+            None
+        }
+    }
+
+    pub fn remove_permission_type(&mut self, permission_type: String) -> Option<PermissionType> {
+        self.permission_types.remove(&permission_type)
     }
 }
