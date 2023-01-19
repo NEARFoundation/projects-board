@@ -1,5 +1,5 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::store::{UnorderedMap, UnorderedSet, Vector};
+use near_sdk::store::{UnorderedMap, Vector};
 use near_sdk::{log, near_bindgen, AccountId};
 
 mod models;
@@ -12,7 +12,7 @@ pub struct Contract {
     projects: UnorderedMap<String, project::Project>,
     permissions: UnorderedMap<String, permission::Permission>,
     permission_types: UnorderedMap<String, permission::PermissionType>,
-    contributors: UnorderedSet<AccountId>,
+    contributors: UnorderedMap<AccountId, contributors::Contributor>,
     contributions: UnorderedMap<String, Vector<contribution::Contribution>>,
     contribution_types: UnorderedMap<String, contribution::ContributionType>,
     contribution_status_types: UnorderedMap<String, contribution::ContributionStatusType>,
@@ -24,7 +24,7 @@ impl Default for Contract {
             projects: UnorderedMap::new(b"p"),
             permissions: UnorderedMap::new(b"a"),
             permission_types: UnorderedMap::new(b"t"),
-            contributors: UnorderedSet::new(b"c"),
+            contributors: UnorderedMap::new(b"c"),
             contributions: UnorderedMap::new(b"s"),
             contribution_types: UnorderedMap::new(b"o"),
             contribution_status_types: UnorderedMap::new(b"n"),

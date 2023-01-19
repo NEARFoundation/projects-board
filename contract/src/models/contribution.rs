@@ -19,7 +19,7 @@ pub struct ContributionStatus {
     transaction_id: String,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize)]
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct ContributionType {
     name: String,
