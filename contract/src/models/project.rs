@@ -35,11 +35,7 @@ impl Contract {
     }
 
     pub fn create_project(&mut self, create_project: Project) -> Option<Project> {
-        let mut random_bytes_array: [u8; 16] = [0; 16];
-
-        for (index, byte) in env::random_seed().iter().enumerate().take(16) {
-            random_bytes_array[index] = byte.clone();
-        }
+        let mut random_bytes_array: [u8; 16] = env::random_seed_array()[0..16].try_into().unwrap();
 
         self.projects.insert(
             Builder::from_bytes(random_bytes_array)

@@ -1,17 +1,20 @@
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
+    near_bindgen,
     serde::{Deserialize, Serialize},
     AccountId,
 };
 
-#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize)]
+use crate::{Contract, ContractExt};
+
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct PermissionType {
     name: String,
     description: String,
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize)]
+#[derive(BorshDeserialize, BorshSerialize, Deserialize, Serialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Permission {
     id: String,
@@ -19,4 +22,90 @@ pub struct Permission {
     contributor_id: AccountId,
     project_id: AccountId,
     type_id: String,
+}
+
+#[derive(Serialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct PermissionView {
+    id: String,
+    description: String,
+    contributor_id: AccountId,
+    project_id: AccountId,
+    permission_type: PermissionType,
+}
+
+#[near_bindgen]
+impl Contract {
+    pub fn get_permission(&self, permission_id: String) -> Option<PermissionView> {
+        let permission = self.permissions.get(&permission_id)?.clone();
+        let permission_type = self.permission_types.get(&permission.type_id)?.clone();
+
+        Some(PermissionView {
+            id: permission.id,
+            description: permission.description,
+            project_id: permission.project_id,
+            contributor_id: permission.contributor_id,
+            permission_type,
+        })
+    }
+
+    pub fn create_permission(&mut self, permission: Permission) -> Option<PermissionView> {
+        let permission_type = self.permission_types.get(&permission.type_id)?.clone();
+
+        let id = match String::from_utf8(near_sdk::env::random_seed()) {
+            Ok(id) => id,
+            _ => {
+                return None;
+            }
+        };
+
+        let mut permission = permission;
+
+        permission.id = id.clone();
+
+        let permission = self.permissions.insert(id.clone(), permission)?;
+
+        Some(PermissionView {
+            id,
+            description: permission.description,
+            project_id: permission.project_id,
+            contributor_id: permission.contributor_id,
+            permission_type,
+        })
+    }
+
+    pub fn remove_permission(&mut self, permission_id: String) -> Option<PermissionView> {
+        let permission = self.permissions.remove(&permission_id)?;
+        let permission_type = self.permission_types.get(&permission.type_id)?.clone();
+
+        Some(PermissionView {
+            id: permission.id,
+            description: permission.description,
+            project_id: permission.project_id,
+            contributor_id: permission.contributor_id,
+            permission_type,
+        })
+    }
+
+    pub fn update_permission(
+        &mut self,
+        permission_id: String,
+        permission: Permission,
+    ) -> Option<PermissionView> {
+        if !self.permissions.contains_key(&permission_id) {
+            return None;
+        }
+
+        let permission_type = self.permission_types.get(&permission.type_id)?.clone();
+
+        let permission = self.permissions.insert(permission_id, permission)?;
+
+        Some(PermissionView {
+            id: permission.id,
+            description: permission.description,
+            project_id: permission.project_id,
+            contributor_id: permission.contributor_id,
+            permission_type,
+        })
+    }
 }

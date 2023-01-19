@@ -10,18 +10,24 @@ use models::*;
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
     projects: UnorderedMap<String, project::Project>,
-    permisssions: UnorderedMap<String, permission::Permission>,
+    permissions: UnorderedMap<String, permission::Permission>,
+    permission_types: UnorderedMap<String, permission::PermissionType>,
     contributors: UnorderedSet<AccountId>,
     contributions: UnorderedMap<String, Vector<contribution::Contribution>>,
+    contribution_types: UnorderedMap<String, contribution::ContributionType>,
+    contribution_status_types: UnorderedMap<String, contribution::ContributionStatusType>,
 }
 
 impl Default for Contract {
     fn default() -> Self {
         Self {
             projects: UnorderedMap::new(b"p"),
-            permisssions: UnorderedMap::new(b"a"),
+            permissions: UnorderedMap::new(b"a"),
+            permission_types: UnorderedMap::new(b"t"),
             contributors: UnorderedSet::new(b"c"),
             contributions: UnorderedMap::new(b"s"),
+            contribution_types: UnorderedMap::new(b"o"),
+            contribution_status_types: UnorderedMap::new(b"n"),
         }
     }
 }
