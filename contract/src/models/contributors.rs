@@ -17,7 +17,7 @@ pub struct Contributor {
 
 #[near_bindgen]
 impl Contract {
-    pub fn add_contribution_types_for_contributor(
+    pub fn add_contributor_contribution_types(
         &mut self,
         contribution_types: Vec<String>,
     ) -> Option<Vec<ContributionType>> {
@@ -43,6 +43,37 @@ impl Contract {
                     set.extend(contribution_types);
                     set
                 },
+            });
+
+        Some(
+            contributor
+                .contribution_types_currently_offered
+                .iter()
+                .filter_map(|name| self.contribution_types.get(name))
+                .cloned()
+                .collect(),
+        )
+    }
+
+    pub fn remove_contributor_contribution_types(
+        &mut self,
+        contribution_types: Vec<String>,
+    ) -> Option<Vec<ContributionType>> {
+        let contributor = self
+            .contributors
+            .entry(env::signer_account_id())
+            .and_modify(|contributor| {
+                contribution_types.iter().for_each(|name| {
+                    contributor
+                        .contribution_types_currently_offered
+                        .remove(name);
+                })
+            })
+            .or_insert(Contributor {
+                id: env::signer_account_id(),
+                contribution_types_currently_offered: UnorderedSet::new(
+                    env::signer_account_id().as_bytes(),
+                ),
             });
 
         Some(
